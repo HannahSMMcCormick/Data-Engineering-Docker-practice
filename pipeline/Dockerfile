@@ -1,8 +1,11 @@
 FROM python:3.13
-
-RUN pip install pandas pyarrow
-
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin
 WORKDIR /code
-COPY pipeline.py . 
+COPY pyproject.toml .python-version uv.lock ./
 
-ENTRYPOINT [ "python","pipeline.py" ]
+
+COPY src/ ./src/
+
+RUN uv sync --locked
+
+ENTRYPOINT ["uv", "run", "python", "-m", "pipeline.pipeline"]
